@@ -1,6 +1,6 @@
 class CreateApiLogs < ActiveRecord::Migration[6.0]
   def change
-    create_table :api_logs do |t|
+    create_table :api_base_api_logs do |t|
       t.text :api, null: false
       t.text :origin, null: false
       t.text :source, null: false

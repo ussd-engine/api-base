@@ -23,12 +23,12 @@ module ApiBase
 
     rescue_from Stoplight::Error::RedLight do
       Rails.logger.warn "#{identifier} api circuit is closed"
-      raise Api::Error::ApiError, "Circuit broken"
+      raise ApiBase::Error::ApiError, "Circuit broken"
     end
 
     rescue_from Faraday::TimeoutError do
       Rails.logger.warn "#{identifier} api timed-out"
-      raise Api::Error::ApiError, "Request timed-out"
+      raise ApiBase::Error::ApiError, "Request timed-out"
     end
 
     protected
@@ -41,7 +41,7 @@ module ApiBase
       light.with_error_handler do |error, handler|
         # We don't want processing errors to affect our circuit breakers
         # They are our api equivalent of runtime errors.
-        raise error if error.is_a?(Api::Error::ProcessingError)
+        raise error if error.is_a?(ApiBase::Error::ProcessingError)
 
         handler.call(error)
       end
@@ -55,7 +55,7 @@ module ApiBase
     def validate_status_code(response)
       return if success_status_codes.include?(response.status)
 
-      raise Api::Error::ProcessingError, "Request failed with status: #{response.status}"
+      raise ApiBase::Error::ProcessingError, "Request failed with status: #{response.status}"
     end
 
     def success_status_codes
