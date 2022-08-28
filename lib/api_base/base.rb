@@ -1,7 +1,9 @@
-require "faraday"
-require "stoplight"
-require "api_base/concerns/traceable"
-require "api_base/concerns/filterer"
+# frozen_string_literal: true
+
+require 'faraday'
+require 'stoplight'
+require 'api_base/concerns/traceable'
+require 'api_base/concerns/filterer'
 
 module ApiBase
   class Base
@@ -10,25 +12,25 @@ module ApiBase
     include Concerns::Filterer
 
     def identifier
-      raise NotImplementedError, "identifier is not implemented"
+      raise NotImplementedError, 'identifier is not implemented'
     end
 
     def connection
-      raise NotImplementedError, "connection is not implemented"
+      raise NotImplementedError, 'connection is not implemented'
     end
 
     def sensitive_data_keys
-      raise NotImplementedError, "sensitive_data_keys is not implemented"
+      raise NotImplementedError, 'sensitive_data_keys is not implemented'
     end
 
     rescue_from Stoplight::Error::RedLight do
       Rails.logger.warn "#{identifier} api circuit is closed"
-      raise ApiBase::Error::ApiError, "Circuit broken"
+      raise ApiBase::Error::ApiError, 'Circuit broken'
     end
 
     rescue_from Faraday::TimeoutError do
       Rails.logger.warn "#{identifier} api timed-out"
-      raise ApiBase::Error::ApiError, "Request timed-out"
+      raise ApiBase::Error::ApiError, 'Request timed-out'
     end
 
     protected

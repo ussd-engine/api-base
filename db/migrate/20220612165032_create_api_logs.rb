@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateApiLogs < ActiveRecord::Migration[6.0]
   def change
     create_table :api_base_api_logs do |t|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: api_logs
@@ -18,7 +20,7 @@
 #  created_at       :datetime         not null
 #  updated_at       :datetime         not null
 #
-require "English"
+require 'English'
 
 module ApiBase
   class ApiLog < ApplicationRecord
@@ -33,8 +35,8 @@ module ApiBase
     validates :method, presence: true, inclusion: { in: %w[GET POST DELETE PUT] }
 
     def self.start_outgoing_request(origin, method, endpoint, payload)
-      ApiLog.new api: origin.identifier, origin: origin.class.to_s, source: "outgoing_request",
-                 endpoint: "#{origin.connection.url_prefix}#{endpoint}", method: method,
+      ApiLog.new api: origin.identifier, origin: origin.class.to_s, source: 'outgoing_request',
+                 endpoint: "#{origin.connection.url_prefix}#{endpoint}", method:,
                  request_headers: origin.connection.headers, request_body: payload
     end
 
@@ -43,21 +45,21 @@ module ApiBase
       # The ones set from the connection might not be the final headers.
       self.request_headers = response.env.request_headers
       # Set the rest of the response attributes.
-      assign_attributes status_code: response.status, duration: duration,
+      assign_attributes status_code: response.status, duration:,
                         response_body: response.body, response_headers: response.headers
     end
 
     def self.start_weekhook_request(origin, request)
-      ApiLog.new api: origin, origin: origin.class.to_s, source: "incoming_webhook",
+      ApiLog.new api: origin, origin: origin.class.to_s, source: 'incoming_webhook',
                  endpoint: request.fullpath, method: request.method,
                  request_headers: request.headers.env.reject { |key|
-                   key.to_s.include?(".")
+                   key.to_s.include?('.')
                  }, request_body: request.params
     end
 
     def complete_webhook_request(response, duration)
       # Set the rest of the response attributes.
-      assign_attributes status_code: response.status, duration: duration,
+      assign_attributes status_code: response.status, duration:,
                         response_body: response.body, response_headers: response.headers
     end
 
@@ -74,11 +76,11 @@ module ApiBase
     private
 
     def nothing_changed
-      errors.add(:base, "Record is read-only") if changed?
+      errors.add(:base, 'Record is read-only') if changed?
     end
 
     def data_sanitized
-      errors.add(:base, "Data must be sanitized") unless sanitized?
+      errors.add(:base, 'Data must be sanitized') unless sanitized?
     end
 
     def parse_json_fields

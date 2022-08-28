@@ -25,26 +25,26 @@ module ApiBase
       protected
 
       def make_request(endpoint, payload)
-        trace_active_tag("request.endpoint", endpoint)
-        trace_active_tag("request.payload", filter_object(payload))
+        trace_active_tag('request.endpoint', endpoint)
+        trace_active_tag('request.payload', filter_object(payload))
 
         start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         response = execute_request(endpoint, payload)
         duration = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
 
-        trace_active_tag("response.status", response.status)
-        trace_active_tag("response.body", filter_object(response.body))
-        trace_active_tag("response.duration", duration)
+        trace_active_tag('response.status', response.status)
+        trace_active_tag('response.body', filter_object(response.body))
+        trace_active_tag('response.duration', duration)
 
         [response, duration]
       end
 
       def method
-        raise NotImplementedError, "method is not implemented"
+        raise NotImplementedError, 'method is not implemented'
       end
 
       def execute_request
-        raise NotImplementedError, "execute_request is not implemented"
+        raise NotImplementedError, 'execute_request is not implemented'
       end
     end
   end

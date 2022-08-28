@@ -14,13 +14,13 @@ module ApiBase
         execute do
           connection.post(endpoint, payload) do |req|
             req.body = payload.to_json
-            req.headers["Content-Type"] = "application/json"
+            req.headers['Content-Type'] = 'application/json'
           end
         end
       end
 
       def method
-        "POST"
+        'POST'
       end
     end
   end

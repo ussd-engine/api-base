@@ -13,13 +13,13 @@ module ApiBase
       def execute_request(endpoint, _payload)
         execute do
           connection.get(endpoint) do |req|
-            req.headers["Content-Type"] = "application/json"
+            req.headers['Content-Type'] = 'application/json'
           end
         end
       end
 
       def method
-        "GET"
+        'GET'
       end
     end
   end
