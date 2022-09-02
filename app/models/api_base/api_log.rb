@@ -20,14 +20,14 @@
 #  created_at       :datetime         not null
 #  updated_at       :datetime         not null
 #
-require 'English'
+require "English"
 
 module ApiBase
   class ApiLog < ApplicationRecord
     attribute :sanitized, :boolean, default: false
 
-    validate :nothing_changed, unless: :new_record?
-    validate :data_sanitized
+    validate :ensure_nothing_changed, unless: :new_record?
+    validate :ensure_data_sanitized
 
     validates_presence_of :api, :origin, :source, :endpoint
 
@@ -35,8 +35,8 @@ module ApiBase
     validates :method, presence: true, inclusion: { in: %w[GET POST DELETE PUT] }
 
     def self.start_outgoing_request(origin, method, endpoint, payload)
-      ApiLog.new api: origin.identifier, origin: origin.class.to_s, source: 'outgoing_request',
-                 endpoint: "#{origin.connection.url_prefix}#{endpoint}", method:,
+      ApiLog.new api: origin.identifier, origin: origin.class.to_s, source: "outgoing_request",
+                 endpoint: "#{origin.connection.url_prefix}#{endpoint}", method: method,
                  request_headers: origin.connection.headers, request_body: payload
     end
 
@@ -45,21 +45,21 @@ module ApiBase
       # The ones set from the connection might not be the final headers.
       self.request_headers = response.env.request_headers
       # Set the rest of the response attributes.
-      assign_attributes status_code: response.status, duration:,
+      assign_attributes status_code: response.status, duration: duration,
                         response_body: response.body, response_headers: response.headers
     end
 
-    def self.start_weekhook_request(origin, request)
-      ApiLog.new api: origin, origin: origin.class.to_s, source: 'incoming_webhook',
+    def self.start_webhook_request(origin, request)
+      ApiLog.new api: origin, origin: origin.class.to_s, source: "incoming_webhook",
                  endpoint: request.fullpath, method: request.method,
                  request_headers: request.headers.env.reject { |key|
-                   key.to_s.include?('.')
+                   key.to_s.include?(".")
                  }, request_body: request.params
     end
 
     def complete_webhook_request(response, duration)
       # Set the rest of the response attributes.
-      assign_attributes status_code: response.status, duration:,
+      assign_attributes status_code: response.status, duration: duration,
                         response_body: response.body, response_headers: response.headers
     end
 
@@ -75,12 +75,12 @@ module ApiBase
 
     private
 
-    def nothing_changed
-      errors.add(:base, 'Record is read-only') if changed?
+    def ensure_nothing_changed
+      errors.add(:base, "Record is read-only") if changed?
     end
 
-    def data_sanitized
-      errors.add(:base, 'Data must be sanitized') unless sanitized?
+    def ensure_data_sanitized
+      errors.add(:base, "Data must be sanitized") unless sanitized?
     end
 
     def parse_json_fields

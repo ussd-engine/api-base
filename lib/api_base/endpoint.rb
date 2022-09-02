@@ -1,36 +1,34 @@
 # frozen_string_literal: true
 
-require 'faraday'
-require 'stoplight'
-require 'api_base/concerns/traceable'
-require 'api_base/concerns/filterer'
+require "faraday"
+require "stoplight"
+require "api_base/service"
+require "api_base/connection"
+require "api_base/concerns/traceable"
+require "api_base/concerns/filterer"
+require "api_base/errors/api_error"
+require "api_base/errors/processing_error"
 
 module ApiBase
-  class Base
+  class Endpoint
     include ActiveSupport::Rescuable
     include Concerns::Traceable
     include Concerns::Filterer
-
-    def identifier
-      raise NotImplementedError, 'identifier is not implemented'
-    end
-
-    def connection
-      raise NotImplementedError, 'connection is not implemented'
-    end
-
-    def sensitive_data_keys
-      raise NotImplementedError, 'sensitive_data_keys is not implemented'
-    end
+    include ApiBase::Service
+    include ApiBase::Connection
 
     rescue_from Stoplight::Error::RedLight do
       Rails.logger.warn "#{identifier} api circuit is closed"
-      raise ApiBase::Error::ApiError, 'Circuit broken'
+      raise ApiBase::Errors::ApiError, "Circuit broken"
     end
 
     rescue_from Faraday::TimeoutError do
       Rails.logger.warn "#{identifier} api timed-out"
-      raise ApiBase::Error::ApiError, 'Request timed-out'
+      raise ApiBase::Errors::ApiError, "Request timed-out"
+    end
+
+    def identifier
+      "#{service_name}:#{connection_name}"
     end
 
     protected
@@ -43,7 +41,7 @@ module ApiBase
       light.with_error_handler do |error, handler|
         # We don't want processing errors to affect our circuit breakers
         # They are our api equivalent of runtime errors.
-        raise error if error.is_a?(ApiBase::Error::ProcessingError)
+        raise error if error.is_a?(ApiBase::Errors::ProcessingError)
 
         handler.call(error)
       end
@@ -57,15 +55,11 @@ module ApiBase
     def validate_status_code(response)
       return if success_status_codes.include?(response.status)
 
-      raise ApiBase::Error::ProcessingError, "Request failed with status: #{response.status}"
-    end
-
-    def success_status_codes
-      [200, 201]
+      raise ApiBase::Errors::ProcessingError, "Request failed with status: #{response.status}"
     end
 
     def filterer
-      @filterer ||= ActiveSupport::ParameterFilter.new sensitive_data_keys
+      @filterer ||= ActiveSupport::ParameterFilter.new sensitive_keys
     end
   end
 end
