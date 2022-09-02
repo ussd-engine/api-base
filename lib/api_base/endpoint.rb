@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require "faraday"
-require "stoplight"
-require "api_base/service"
-require "api_base/connection"
-require "api_base/concerns/traceable"
-require "api_base/concerns/filterer"
-require "api_base/errors/api_error"
-require "api_base/errors/processing_error"
+require 'faraday'
+require 'stoplight'
+require 'api_base/service'
+require 'api_base/connection'
+require 'api_base/concerns/traceable'
+require 'api_base/concerns/filterer'
+require 'api_base/errors/api_error'
+require 'api_base/errors/processing_error'
 
 module ApiBase
   class Endpoint
@@ -19,12 +19,12 @@ module ApiBase
 
     rescue_from Stoplight::Error::RedLight do
       Rails.logger.warn "#{identifier} api circuit is closed"
-      raise ApiBase::Errors::ApiError, "Circuit broken"
+      raise ApiBase::Errors::ApiError, 'Circuit broken'
     end
 
     rescue_from Faraday::TimeoutError do
       Rails.logger.warn "#{identifier} api timed-out"
-      raise ApiBase::Errors::ApiError, "Request timed-out"
+      raise ApiBase::Errors::ApiError, 'Request timed-out'
     end
 
     def identifier

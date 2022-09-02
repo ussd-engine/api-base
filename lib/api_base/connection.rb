@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "faraday"
-require "stoplight"
-require "api_base/concerns/traceable"
-require "api_base/concerns/filterer"
+require 'faraday'
+require 'stoplight'
+require 'api_base/concerns/traceable'
+require 'api_base/concerns/filterer'
 
 module ApiBase
   module Connection
@@ -23,7 +23,7 @@ module ApiBase
     protected
 
     def with_connection(connection_name)
-      raise NotImplementedError, "with_connection is not implemented"
+      raise NotImplementedError, 'with_connection is not implemented'
     end
   end
 end
